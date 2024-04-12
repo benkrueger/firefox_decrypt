@@ -36,6 +36,7 @@ from subprocess import run, PIPE, DEVNULL
 from urllib.parse import urlparse
 from configparser import ConfigParser
 from typing import Optional, Iterator, Any
+from security import safe_command
 
 LOG: logging.Logger
 VERBOSE = False
@@ -670,7 +671,7 @@ class PassOutputFormat(OutputFormat):
         LOG.debug("Testing if password store is installed and configured")
 
         try:
-            p = run([self.cmd, "ls"], capture_output=True, text=True)
+            p = safe_command.run(run, [self.cmd, "ls"], capture_output=True, text=True)
         except FileNotFoundError as e:
             if e.errno == 2:
                 LOG.error("Password store is not installed and exporting was requested")
@@ -747,7 +748,7 @@ class PassOutputFormat(OutputFormat):
 
                 LOG.debug("Running command '%s' with stdin '%s'", cmd, data)
 
-                p = run(cmd, input=data, capture_output=True, text=True)
+                p = safe_command.run(run, cmd, input=data, capture_output=True, text=True)
 
                 if p.returncode != 0:
                     LOG.error("ERROR: passwordstore exited with non-zero: %s", p.returncode)
